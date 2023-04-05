@@ -1,7 +1,5 @@
-using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using static CarController;
+using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
@@ -31,10 +29,16 @@ public class CarController : MonoBehaviour
     [SerializeField] Axle[] axles;
     [SerializeField] float maxMotorTorque;
     [SerializeField] float maxSteeringAngle;
+
+    // New reset variables
+    public Transform resetPosition;
+    public float resetDelay = 1f;
+    private bool isResetting = false;
+
     public void FixedUpdate()
     {
-        float motor = maxMotorTorque * Input.GetAxis("Vertical"); 
-        float steering = maxSteeringAngle * Input.GetAxis("Horizontal"); 
+        float motor = maxMotorTorque * Input.GetAxis("Vertical");
+        float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
 
         foreach (Axle axle in axles)
         {
@@ -51,5 +55,23 @@ public class CarController : MonoBehaviour
             UpdateWheelTransform(axle.leftWheel);
             UpdateWheelTransform(axle.rightWheel);
         }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("Trigger Entered");
+        if (other.gameObject.CompareTag("ResetTrigger") && !isResetting)
+        {
+            StartCoroutine(ResetVehicleCoroutine());
+        }
+    }
+
+    private IEnumerator ResetVehicleCoroutine()
+    {
+        isResetting = true;
+        yield return new WaitForSeconds(resetDelay);
+        transform.position = resetPosition.position;
+        transform.rotation = resetPosition.rotation;
+        isResetting = false;
     }
 }
