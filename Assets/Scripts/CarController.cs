@@ -59,7 +59,6 @@ public class CarController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Trigger Entered");
         if (other.gameObject.CompareTag("ResetTrigger") && !isResetting)
         {
             StartCoroutine(ResetVehicleCoroutine());
