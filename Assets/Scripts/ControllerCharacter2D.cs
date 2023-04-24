@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class ControllerCharacter2D : MonoBehaviour
@@ -17,8 +18,9 @@ public class ControllerCharacter2D : MonoBehaviour
     [SerializeField] Transform groundTransform;
     [SerializeField] LayerMask groundLayerMask;
     [SerializeField] float groundRadius;
-    [SerializeField] Transform attackTransform;
-    [SerializeField] float attackRadius;
+    //[SerializeField] Transform attackTransform;
+    //[SerializeField] float attackRadius;
+    public Vector3 respawnPoint;
 
     //[SerializeField] LayerMask attackLayerMask;
     float groundAngle = 0;
@@ -32,6 +34,7 @@ public class ControllerCharacter2D : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        respawnPoint = transform.position;
     }
     void Update()
     {
@@ -57,11 +60,16 @@ public class ControllerCharacter2D : MonoBehaviour
                 StartCoroutine(DoubleJump());
                 animator.SetTrigger("Jump");
             }
-            if (Input.GetMouseButtonDown(0))
-            {
-                animator.SetTrigger("Attack");
-                CheckAttack();
-            }
+            //if (Input.GetMouseButtonDown(0))
+            //{
+            //    animator.SetTrigger("Attack");
+            //    CheckAttack();
+            //}
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            transform.position = respawnPoint;
         }
 
         // adjust gravity for jump
@@ -128,17 +136,25 @@ public class ControllerCharacter2D : MonoBehaviour
         Gizmos.DrawSphere(groundTransform.position, groundRadius);
     }
 
-    private void CheckAttack()
-    {
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(attackTransform.position, attackRadius);
-        foreach (Collider2D collider in colliders)
-        {
-            if (collider.gameObject == gameObject) continue;
+    //private void CheckAttack()
+    //{
+    //    Collider2D[] colliders = Physics2D.OverlapCircleAll(attackTransform.position, attackRadius);
+    //    foreach (Collider2D collider in colliders)
+    //    {
+    //        if (collider.gameObject == gameObject) continue;
 
-            if (collider.gameObject.TryGetComponent<IDamagable>(out var damagable))
-            {
-                damagable.Damage(25);
-            }
+    //        if (collider.gameObject.TryGetComponent<IDamagable>(out var damagable))
+    //        {
+    //            damagable.Damage(25);
+    //        }
+    //    }
+    //}
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "Checkpoint")
+        {
+            respawnPoint = collision.transform.position;
         }
     }
 }

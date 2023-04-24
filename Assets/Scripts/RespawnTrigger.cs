@@ -9,6 +9,7 @@ public class RespawnTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             other.transform.position = new Vector3(-44.73f, -20.19f, 0f); // Reset player position to (0, 0, 0)
+            
         }
     }
 }
