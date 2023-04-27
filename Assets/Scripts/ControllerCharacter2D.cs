@@ -6,35 +6,41 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Rigidbody2D))]
 public class ControllerCharacter2D : MonoBehaviour
 {
+    private GameManager gameManager;
+
     [SerializeField] Animator animator;
     [SerializeField] SpriteRenderer spriteRenderer;
+
     [SerializeField] float speed;
     [SerializeField] float jumpHeight;
-    [SerializeField] float hitForce;
     [SerializeField] float doubleJumpHeight;
     [SerializeField, Range(1, 5)] float fallRateMultiplier;
     [SerializeField, Range(1, 5)] float lowJumpRateMultiplier;
+
     [Header("Ground")]
     [SerializeField] Transform groundTransform;
     [SerializeField] LayerMask groundLayerMask;
     [SerializeField] float groundRadius;
+
     //[SerializeField] Transform attackTransform;
     //[SerializeField] float attackRadius;
-    public Vector3 respawnPoint;
-
+    //[SerializeField] float hitForce;
     //[SerializeField] LayerMask attackLayerMask;
-    float groundAngle = 0;
 
+    public Vector3 respawnPoint;
+    public AudioSource winSound;
+
+    float groundAngle = 0;
     Rigidbody2D rb;
     Vector2 velocity = Vector2.zero;
     bool faceRight = true;
 
-
     void Start()
     {
+        respawnPoint = transform.position;
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        respawnPoint = transform.position;
+        gameManager = FindObjectOfType<GameManager>();
     }
     void Update()
     {
@@ -70,6 +76,7 @@ public class ControllerCharacter2D : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             transform.position = respawnPoint;
+            gameManager.IncrementDeathCount();
         }
 
         // adjust gravity for jump
@@ -88,8 +95,9 @@ public class ControllerCharacter2D : MonoBehaviour
 
         // update animator
         animator.SetFloat("Speed", Mathf.Abs(velocity.x));
-        animator.SetBool("Fall", !onGround && velocity.y < -0.1f);
+        animator.SetBool("Fall", !onGround && velocity.y < -0.01f);
     }
+
     IEnumerator DoubleJump()
     {
         // wait a little after the jump to allow a double jump
@@ -152,9 +160,11 @@ public class ControllerCharacter2D : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Checkpoint")
+        if (collision.tag == "Win")
         {
-            respawnPoint = collision.transform.position;
+            gameManager.SetWin();
+            winSound.Play();
+            transform.position = respawnPoint;
         }
     }
 }

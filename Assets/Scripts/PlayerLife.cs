@@ -8,6 +8,8 @@ public class PlayerLife : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anim;
     private ControllerCharacter2D cc;
+    private GameManager gameManager;
+    public AudioSource deathSound;
 
     void Start()
     {
@@ -15,6 +17,7 @@ public class PlayerLife : MonoBehaviour
         anim = GetComponent<Animator>();
         cc = GetComponent<ControllerCharacter2D>();
         cc.respawnPoint = transform.position;
+        gameManager = FindObjectOfType<GameManager>();
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -29,12 +32,16 @@ public class PlayerLife : MonoBehaviour
     {
         rb.bodyType = RigidbodyType2D.Static;
         anim.SetTrigger("death");
-        Invoke("RestartLevel", 1f);
+        gameManager.IncrementDeathCount();
+        deathSound.Play();
+        Invoke("Respawn", 1f);
     }
 
-    private void RestartLevel()
+    public void Respawn()
     {
-        PlayerPrefs.SetFloat("SavedTime", FindObjectOfType<GameManager>().timer);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        transform.position = cc.respawnPoint;
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
     }
 }
